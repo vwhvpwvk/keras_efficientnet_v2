@@ -158,8 +158,9 @@ class MeanLayer(Layer):
     def __init__(self, axis_dim, **kwargs):
         super(MeanLayer, self).__init__(**kwargs)
         self.axis_dim = axis_dim
+        self.kwargs = kwargs
     def call(self, inputs):
-        out = tf.reduce_mean(inputs, self.axis_dim, keepdims = True)
+        out = tf.reduce_mean(inputs, self.axis_dim, **self.kwargs)
         return out
 
 def _make_divisible(v, divisor=4, min_value=None):
@@ -213,7 +214,7 @@ def se_module(inputs, se_ratio=4, name=""):
     reduction = filters // se_ratio
     # se = GlobalAveragePooling2D()(inputs)
     # se = Reshape((1, 1, filters))(se)
-    se = MeanLayer([h_axis, w_axis])(inputs) # changed it to Lambda layer, to make it 
+    se = MeanLayer(axis_dim = [h_axis, w_axis], keepdims = True)(inputs) # changed it to Lambda layer, to make it 
     # compatible with tf2.16.1.
     se = Conv2D(reduction, kernel_size=1, use_bias=True, kernel_initializer=CONV_KERNEL_INITIALIZER, name=name + "1_conv")(se)
     # se = PReLU(shared_axes=[1, 2])(se)
