@@ -22,7 +22,8 @@ from tensorflow.keras.layers import (
     PReLU,
     Reshape,
     Multiply,
-    Lambda
+    Lambda,
+    Layer
 )
 
 BATCH_NORM_DECAY = 0.9
@@ -153,6 +154,13 @@ FILE_HASH_DICT = {
     "v1-l2": {"noisy_student": "5fedc721febfca4b08b03d1f18a4a3ca"},
 }
 
+class MeanLayer(Layer):
+    def __init__(self, axis_dim):
+        self.axis_dim = axis_dim
+    def call(self, inputs):
+        out = tf.reduce_mean(inputs, self.axis_dim, keepdims = True)
+        return out
+
 def _make_divisible(v, divisor=4, min_value=None):
     """
     This function is taken from the original tf repo.
@@ -204,10 +212,8 @@ def se_module(inputs, se_ratio=4, name=""):
     reduction = filters // se_ratio
     # se = GlobalAveragePooling2D()(inputs)
     # se = Reshape((1, 1, filters))(se)
-    se = Lambda(lambda x: \
-                tf.reduce_mean(x, 
-                               [h_axis, w_axis], 
-                               keepdims=True))(inputs)
+    se = MeanLayer([h_axis, w_axis])(inputs) # changed it to Lambda layer, to make it 
+    # compatible with tf2.16.1.
     se = Conv2D(reduction, kernel_size=1, use_bias=True, kernel_initializer=CONV_KERNEL_INITIALIZER, name=name + "1_conv")(se)
     # se = PReLU(shared_axes=[1, 2])(se)
     se = Activation("swish")(se)
