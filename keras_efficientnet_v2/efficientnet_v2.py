@@ -156,7 +156,7 @@ FILE_HASH_DICT = {
 
 class MeanLayer(Layer):
     def __init__(self, axis_dim, **kwargs):
-        super(MeanLayer, self).__init__(**kwargs)
+        super(MeanLayer, self).__init__()
         self.axis_dim = axis_dim
         self.kwargs = kwargs
     def call(self, inputs):
