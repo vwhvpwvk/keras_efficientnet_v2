@@ -155,7 +155,8 @@ FILE_HASH_DICT = {
 }
 
 class MeanLayer(Layer):
-    def __init__(self, axis_dim):
+    def __init__(self, axis_dim, **kwargs):
+        super(MeanLayer, self).__init__(**kwargs)
         self.axis_dim = axis_dim
     def call(self, inputs):
         out = tf.reduce_mean(inputs, self.axis_dim, keepdims = True)
